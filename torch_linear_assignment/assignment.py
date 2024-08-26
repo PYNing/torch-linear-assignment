@@ -79,7 +79,7 @@ def assignment_to_indices(assignment):
 
 def batch_linear_assignment_var_len_cuda(batch_cost):
     new_batch_cost = list()
-    transposed_tensors = list()
+    transposed_tensors_id = list()
     empty_flag = list()
     for idx, cost in enumerate(batch_cost):
         transposed_flag = False
@@ -95,7 +95,7 @@ def batch_linear_assignment_var_len_cuda(batch_cost):
         cost = cost.contiguous()
         new_batch_cost.append(cost)
         if transposed_flag:
-            transposed_tensors.append(cost)
+            transposed_tensors_id.append(id(cost))
     
     ret = list()
     batch_col4row, batch_row4col = backend.batch_linear_assignment_var_len(new_batch_cost)
@@ -105,7 +105,7 @@ def batch_linear_assignment_var_len_cuda(batch_cost):
         w, t = cost.shape
         new_col4row_offset = col4row_offset + w
         new_row4col_offset = row4col_offset + t
-        if cost in transposed_tensors:
+        if id(cost) in transposed_tensors_id:
             assignment = batch_row4col[row4col_offset:new_row4col_offset]
         else:
             assignment = batch_col4row[col4row_offset:new_col4row_offset]
