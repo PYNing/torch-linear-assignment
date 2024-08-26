@@ -76,3 +76,43 @@ def assignment_to_indices(assignment):
     row_ind = mask.nonzero()[:, 1].reshape(batch_size, n_matches)
     col_ind = assignment.masked_select(mask).reshape(batch_size, n_matches)
     return row_ind, col_ind
+
+def batch_linear_assignment_var_len_cuda(batch_cost):
+    new_batch_cost = list()
+    transposed_tensors = list()
+    empty_flag = list()
+    for idx, cost in enumerate(batch_cost):
+        transposed_flag = False
+        w, t = cost.shape
+        if w == 0 or t == 0:
+            empty_flag.append(idx)
+            continue
+        if not isinstance(cost, (torch.FloatTensor)):
+            cost = cost.to(torch.float)
+        if t < w:
+            cost = cost.T
+            transposed_flag = True
+        cost = cost.contiguous()
+        new_batch_cost.append(cost)
+        if transposed_flag:
+            transposed_tensors.append(cost)
+    
+    ret = list()
+    batch_col4row, batch_row4col = backend.batch_linear_assignment_var_len(new_batch_cost)
+    col4row_offset = 0
+    row4col_offset = 0
+    for cost in new_batch_cost:
+        w, t = cost.shape
+        new_col4row_offset = col4row_offset + w
+        new_row4col_offset = row4col_offset + t
+        if cost in transposed_tensors:
+            assignment = batch_row4col[row4col_offset:new_row4col_offset]
+        else:
+            assignment = batch_col4row[col4row_offset:new_col4row_offset]
+        mask = assignment >= 0
+        workers = mask.nonzero().flatten()
+        tasks = assignment[mask]
+        ret.append([workers, tasks])
+        col4row_offset = new_col4row_offset
+        row4col_offset = new_row4col_offset
+    return ret

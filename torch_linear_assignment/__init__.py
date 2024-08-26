@@ -1,1 +1,1 @@
-from .assignment import batch_linear_assignment, assignment_to_indices
+from .assignment import batch_linear_assignment, assignment_to_indices, batch_linear_assignment_var_len_cuda
