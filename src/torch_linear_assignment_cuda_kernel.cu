@@ -359,8 +359,8 @@ std::vector<torch::Tensor> batch_linear_assignment_var_len_cuda_impl(std::vector
 
   auto batch_col4row = torch::full({total_nr}, -1, torch::TensorOptions().dtype(torch::kInt32).device(device));
   auto batch_row4col = torch::full({total_nc}, -1, torch::TensorOptions().dtype(torch::kInt32).device(device));
-  auto batch_u = torch::empty({total_nr}, torch::TensorOptions().dtype(torch::kFloat32).device(device));
-  auto batch_v = torch::empty({total_nc}, torch::TensorOptions().dtype(torch::kFloat32).device(device));
+  auto batch_u = torch::zeros({total_nr}, torch::TensorOptions().dtype(torch::kFloat32).device(device));
+  auto batch_v = torch::zeros({total_nc}, torch::TensorOptions().dtype(torch::kFloat32).device(device));
   auto batch_shortestPathCosts = torch::empty({total_nc}, torch::TensorOptions().dtype(torch::kFloat32).device(device));
   auto batch_path = torch::full({total_nc}, -1, torch::TensorOptions().dtype(torch::kInt32).device(device));
   auto batch_SR = torch::empty({total_nr}, torch::TensorOptions().dtype(torch::kUInt8).device(device));
