@@ -80,13 +80,9 @@ def assignment_to_indices(assignment):
 def batch_linear_assignment_var_len_cuda(batch_cost):
     new_batch_cost = list()
     transposed_tensors_id = list()
-    empty_flag = list()
     for idx, cost in enumerate(batch_cost):
         transposed_flag = False
         w, t = cost.shape
-        if w == 0 or t == 0:
-            empty_flag.append(idx)
-            continue
         if not isinstance(cost, (torch.FloatTensor)):
             cost = cost.to(torch.float)
         if t < w:
